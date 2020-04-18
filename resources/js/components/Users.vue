@@ -7,11 +7,7 @@
                         <h3 class="card-title">Users Table</h3>
 
                         <div class="card-tools">
-                            <button
-                                class="btn btn-success"
-                                data-toggle="modal"
-                                data-target="#addNewUser"
-                            >
+                            <button class="btn btn-success" @click="newModal">
                                 <i class="fas fa-user-plus fa-fw"></i> Add New
                                 User
                             </button>
@@ -40,7 +36,7 @@
                                         {{ user.created_at | myDate }}
                                     </td>
                                     <td>
-                                        <a href="#">
+                                        <a href="#" @click="editModal(user)">
                                             <i class="fa fa-edit blue"></i>
                                         </a>
                                         <a
@@ -71,8 +67,19 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addNewUserLabel">
+                        <h5
+                            v-show="!editmode"
+                            class="modal-title"
+                            id="addNewUserLabel"
+                        >
                             Add New User
+                        </h5>
+                        <h5
+                            v-show="editmode"
+                            class="modal-title"
+                            id="addNewUserLabel"
+                        >
+                            Update User's info
                         </h5>
                         <button
                             type="button"
@@ -83,7 +90,9 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form @submit.prevent="createUser">
+                    <form
+                        @submit.prevent="editmode ? updateUser() : createUser()"
+                    >
                         <div class="modal-body">
                             <div class="form-group">
                                 <input
@@ -178,8 +187,19 @@
                             >
                                 Close
                             </button>
-                            <button type="submit" class="btn btn-primary">
+                            <button
+                                v-show="!editmode"
+                                type="submit"
+                                class="btn btn-success"
+                            >
                                 Create New User
+                            </button>
+                            <button
+                                v-show="editmode"
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                Update User Data
                             </button>
                         </div>
                     </form>
@@ -193,8 +213,10 @@
 export default {
     data() {
         return {
+            editmode: false,
             users: {},
             form: new Form({
+                id: "",
                 name: "",
                 email: "",
                 password: "",
@@ -205,6 +227,35 @@ export default {
         };
     },
     methods: {
+        updateUser() {
+            this.$Progress.start();
+            this.form
+                .put("api/user/" + this.form.id)
+                .then(() => {
+                    $("#addNewUser").modal("hide");
+                    Swal.fire(
+                        "Updated!",
+                        "User Information has been updated.",
+                        "success"
+                    );
+                    this.$Progress.finish();
+                    Fire2.$emit("AfterCreate");
+                })
+                .catch(() => {
+                    this.$Progress.fail();
+                });
+        },
+        newModal() {
+            this.editmode = false;
+            this.form.reset();
+            $("#addNewUser").modal("show");
+        },
+        editModal(user) {
+            this.editmode = true;
+            this.form.reset();
+            $("#addNewUser").modal("show");
+            this.form.fill(user);
+        },
         deleteUser(id) {
             Swal.fire({
                 title: "Are you sure?",
