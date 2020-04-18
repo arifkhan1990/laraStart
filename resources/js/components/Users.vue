@@ -26,24 +26,27 @@
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Type</th>
+                                    <th>Registered At</th>
                                     <th>Acion</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>183</td>
-                                    <td>John Doe</td>
-                                    <td>11-7-2014</td>
+                                <tr v-for="user in users" :key="user.id">
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.type | upText }}</td>
                                     <td>
-                                        <span class="tag tag-success"
-                                            >Approved</span
-                                        >
+                                        {{ user.created_at | myDate }}
                                     </td>
                                     <td>
                                         <a href="#">
                                             <i class="fa fa-edit blue"></i>
                                         </a>
-                                        <a href>
+                                        <a
+                                            href="#"
+                                            @click="deleteUser(user.id)"
+                                        >
                                             <i class="fa fa-trash red"></i>
                                         </a>
                                     </td>
@@ -80,93 +83,106 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <input
-                                v-model="form.name"
-                                type="text"
-                                name="name"
-                                placeholder="Name"
-                                class="form-control"
-                                :class="{
-                                    'is-invalid': form.errors.has('name')
-                                }"
-                            />
-                            <has-error :form="form" field="name"></has-error>
+                    <form @submit.prevent="createUser">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <input
+                                    v-model="form.name"
+                                    type="text"
+                                    name="name"
+                                    placeholder="Name"
+                                    class="form-control"
+                                    :class="{
+                                        'is-invalid': form.errors.has('name')
+                                    }"
+                                />
+                                <has-error
+                                    :form="form"
+                                    field="name"
+                                ></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input
+                                    v-model="form.email"
+                                    type="email"
+                                    name="email"
+                                    placeholder="Email Address"
+                                    class="form-control"
+                                    :class="{
+                                        'is-invalid': form.errors.has('email')
+                                    }"
+                                />
+                                <has-error
+                                    :form="form"
+                                    field="email"
+                                ></has-error>
+                            </div>
+                            <div class="form-group">
+                                <textarea
+                                    v-model="form.bio"
+                                    type="text"
+                                    name="bio"
+                                    placeholder="Short Bio for user (Optional)"
+                                    class="form-control"
+                                    :class="{
+                                        'is-invalid': form.errors.has('bio')
+                                    }"
+                                ></textarea>
+                                <has-error :form="form" field="bio"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <select
+                                    name="type"
+                                    v-model="form.type"
+                                    id="type"
+                                    class="form-control"
+                                    :class="{
+                                        'is-invalid': form.errors.has('type')
+                                    }"
+                                >
+                                    <option value="">Select User Role</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="user">Standard User</option>
+                                    <option value="author">Author</option>
+                                </select>
+                                <has-error
+                                    :form="form"
+                                    field="type"
+                                ></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input
+                                    v-model="form.password"
+                                    type="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    class="form-control"
+                                    id="password"
+                                    :class="{
+                                        'is-invalid': form.errors.has(
+                                            'password'
+                                        )
+                                    }"
+                                />
+                                <has-error
+                                    :form="form"
+                                    field="password"
+                                ></has-error>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <input
-                                v-model="form.email"
-                                type="email"
-                                name="email"
-                                placeholder="Email Address"
-                                class="form-control"
-                                :class="{
-                                    'is-invalid': form.errors.has('email')
-                                }"
-                            />
-                            <has-error :form="form" field="email"></has-error>
-                        </div>
-                        <div class="form-group">
-                            <textarea
-                                v-model="form.bio"
-                                type="text"
-                                name="bio"
-                                placeholder="Short Bio for user (Optional)"
-                                class="form-control"
-                                :class="{
-                                    'is-invalid': form.errors.has('bio')
-                                }"
-                            ></textarea>
-                            <has-error :form="form" field="bio"></has-error>
-                        </div>
-                        <div class="form-group">
-                            <select
-                                name="type"
-                                v-model="form.type"
-                                id="type"
-                                class="form-control"
-                                :class="{
-                                    'is-invalid': form.errors.has('type')
-                                }"
+                        <div class="modal-footer">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-dismiss="modal"
                             >
-                                <option value="">Select User Role</option>
-                                <option value="admin">Admin</option>
-                                <option value="user">Standard User</option>
-                                <option value="author">Author</option>
-                            </select>
-                            <has-error :form="form" field="type"></has-error>
+                                Close
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Create New User
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <input
-                                v-model="form.password"
-                                type="password"
-                                name="password"
-                                placeholder="Password"
-                                class="form-control"
-                                id="password"
-                                :class="{
-                                    'is-invalid': form.errors.has('password')
-                                }"
-                            />
-                            <has-error
-                                :form="form"
-                                field="password"
-                            ></has-error>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-dismiss="modal"
-                        >
-                            Close
-                        </button>
-                        <button type="button" class="btn btn-primary">
-                            Create New User
-                        </button>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -177,6 +193,7 @@
 export default {
     data() {
         return {
+            users: {},
             form: new Form({
                 name: "",
                 email: "",
@@ -187,8 +204,64 @@ export default {
             })
         };
     },
-    mounted() {
-        console.log("Component mounted.");
+    methods: {
+        deleteUser(id) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then(result => {
+                //send requet to server
+                if (result.value) {
+                    this.form
+                        .delete("api/user/" + id)
+                        .then(() => {
+                            Swal.fire(
+                                "Deleted!",
+                                "User has been deleted.",
+                                "success"
+                            );
+                            Fire2.$emit("AfterCreate");
+                        })
+                        .catch(() => {
+                            Swal.fire(
+                                "Failed!",
+                                "There was somthings wrong.",
+                                "warning"
+                            );
+                        });
+                }
+            });
+        },
+        loadUsers() {
+            axios.get("api/user").then(({ data }) => (this.users = data.data));
+        },
+        createUser() {
+            this.$Progress.start();
+            this.form
+                .post("api/user")
+                .then(() => {
+                    Fire2.$emit("AfterCreate");
+                    $("#addNewUser").modal("hide");
+                    toast.fire({
+                        icon: "success",
+                        title: "User Created successfully!"
+                    });
+                    this.$Progress.finish();
+                })
+                .catch(() => {});
+        }
+    },
+    created() {
+        this.loadUsers();
+        Fire2.$on("AfterCreate", () => {
+            this.loadUsers();
+        });
+        // setInterval(() => this.loadUsers(), 3000);
     }
 };
 </script>
